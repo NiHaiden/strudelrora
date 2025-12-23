@@ -115,4 +115,6 @@ sudo dnf5 config-manager addrepo --from-repofile=https://negativo17.org/repos/fe
 
 sudo dnf5 install steam kernel-modules-extra -y
 
+echo "Wow"
+
 sudo dnf5 config-manager setopt fedora-steam.enabled=0
