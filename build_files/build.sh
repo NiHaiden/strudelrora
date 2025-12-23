@@ -113,6 +113,6 @@ getent group onepassword-cli
 
 sudo dnf5 config-manager addrepo --from-repofile=https://negativo17.org/repos/fedora-steam.repo
 
-sudo dnf5 install steam kernel-modules-extra --no-weak-deps
+sudo dnf5 install steam kernel-modules-extra
 
 sudo dnf5 config-manager setopt fedora-steam.enabled=0
