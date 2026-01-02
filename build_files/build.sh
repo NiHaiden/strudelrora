@@ -63,7 +63,7 @@ GID_ONEPASSWORD="1790"
 GID_ONEPASSWORDCLI="1791"
 
 
-cat >/usr/lib/sysusers. d/onepassword.conf <<EOF
+cat >/usr/lib/sysusers.d/onepassword.conf <<EOF
 g onepassword ${GID_ONEPASSWORD}
 EOF
 
@@ -71,14 +71,14 @@ cat >/usr/lib/sysusers.d/onepassword-cli.conf <<EOF
 g onepassword-cli ${GID_ONEPASSWORDCLI}
 EOF
 
-systemd-sysusers /usr/lib/sysusers. d/onepassword.conf
-systemd-sysusers /usr/lib/sysusers. d/onepassword-cli. conf
+systemd-sysusers /usr/lib/sysusers.d/onepassword.conf
+systemd-sysusers /usr/lib/sysusers.d/onepassword-cli. conf
 
 # Now let's install the packages.
 dnf install -y 1password 1password-cli
 
 # Clean up the yum repo (updates are baked into new images)
-rm /etc/yum.repos.d/1password. repo -f
+rm /etc/yum.repos.d/1password.repo -f
 
 # And then we do the hacky dance!
 mv /var/opt/1Password /usr/lib/1Password # move this over here
