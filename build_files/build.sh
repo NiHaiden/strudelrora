@@ -6,7 +6,7 @@ set -ouex pipefail
 
 # Packages can be installed from any enabled yum repo on the image.
 # RPMfusion repos are available by default in ublue main images
-# List of rpmfusion packages can be found here:
+# List of rpmfusion packages can be found here: 
 # https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/39/x86_64/repoview/index.html&protocol=https&redirect=1
 
 # Extract the architecture from the kernel package
@@ -50,20 +50,20 @@ EOF
 # "onepassword", right about now. But if we do that during
 # the ostree build it'll disappear from the running system!
 # I'm going to work around that by hardcoding GIDs and
-# crossing my fingers that nothing else steps on them.
+# crossing my fingers that nothing else steps on them. 
 # These numbers _should_ be okay under normal use, but
 # if there's a more specific range that I should use here
 # please submit a PR!
 
 # Specifically, GID must be > 1000, and absolutely must not
-# conflict with any real groups on the deployed system.
+# conflict with any real groups on the deployed system. 
 # Normal user group GIDs on Fedora are sequential starting
 # at 1000, so let's skip ahead and set to something higher.
 GID_ONEPASSWORD="1790"
 GID_ONEPASSWORDCLI="1791"
 
 
-cat >/usr/lib/sysusers.d/onepassword.conf <<EOF
+cat >/usr/lib/sysusers. d/onepassword.conf <<EOF
 g onepassword ${GID_ONEPASSWORD}
 EOF
 
@@ -71,14 +71,14 @@ cat >/usr/lib/sysusers.d/onepassword-cli.conf <<EOF
 g onepassword-cli ${GID_ONEPASSWORDCLI}
 EOF
 
-systemd-sysusers /usr/lib/sysusers.d/onepassword.conf
-systemd-sysusers /usr/lib/sysusers.d/onepassword-cli.conf
+systemd-sysusers /usr/lib/sysusers. d/onepassword.conf
+systemd-sysusers /usr/lib/sysusers. d/onepassword-cli. conf
 
 # Now let's install the packages.
 dnf install -y 1password 1password-cli
 
 # Clean up the yum repo (updates are baked into new images)
-rm /etc/yum.repos.d/1password.repo -f
+rm /etc/yum.repos.d/1password. repo -f
 
 # And then we do the hacky dance!
 mv /var/opt/1Password /usr/lib/1Password # move this over here
@@ -90,11 +90,11 @@ ln -s /opt/1Password/1password /usr/bin/1password
 #####
 # The following is a bastardization of "after-install.sh"
 # which is normally packaged with 1password. You can compare with
-# /usr/lib/1Password/after-install.sh if you want to see.
+# /usr/lib/1Password/after-install.sh if you want to see. 
 BROWSER_SUPPORT_PATH="/usr/lib/1Password/1Password-BrowserSupport"
 
 # BrowserSupport binary needs setgid. This gives no extra permissions to the binary.
-# It only hardens it against environmental tampering.
+# It only hardens it against environmental tampering. 
 chgrp "${GID_ONEPASSWORD}" "${BROWSER_SUPPORT_PATH}"
 chmod g+s "${BROWSER_SUPPORT_PATH}"
 
@@ -103,7 +103,7 @@ chgrp ${GID_ONEPASSWORDCLI} /usr/bin/op
 chmod g+s /usr/bin/op
 
 # Register path symlink
-# We do this via tmpfiles.d so that it is created by the live system.
+# We do this via tmpfiles. d so that it is created by the live system.
 cat >/usr/lib/tmpfiles.d/eternal-onepassword.conf <<EOF
 L  /opt/1Password  -  -  -  -  /usr/lib/1Password
 EOF
@@ -118,3 +118,14 @@ sudo dnf5 install steam kernel-modules-extra -y
 echo "Wow"
 
 sudo dnf5 config-manager setopt fedora-steam.enabled=0
+
+# Install Ghostty from Terra repo
+echo "Installing Ghostty"
+
+dnf install -y --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
+
+dnf install -y ghostty
+
+# Disable and remove Terra repo
+dnf config-manager --set-disabled terra
+dnf remove -y terra-release
