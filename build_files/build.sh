@@ -118,14 +118,3 @@ sudo dnf5 install steam kernel-modules-extra -y
 echo "Wow"
 
 sudo dnf5 config-manager setopt fedora-steam.enabled=0
-
-# Install Ghostty from Terra repo
-echo "Installing Ghostty"
-
-dnf5 install -y --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
-
-dnf5 install -y ghostty
-
-# Disable and remove Terra repo
-dnf5 config-manager --set-disabled terra
-dnf5 remove -y terra-release
