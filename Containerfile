@@ -37,4 +37,6 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
 
 ### LINTING
 ## Verify final image and contents are correct.
+RUN ln -sf /run /var/run
+
 RUN bootc container lint
