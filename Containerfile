@@ -39,4 +39,9 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
 ## Verify final image and contents are correct.
 RUN ln -sf /run /var/run
 
+RUN rm -rf /var/run && \
+    ln -s /run /var/run && \
+    dnf clean all && \
+    rm -rf /var/lib/dnf /var/cache/dnf /var/log/dnf*
+
 RUN bootc container lint
