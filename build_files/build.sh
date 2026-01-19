@@ -46,6 +46,8 @@ repo_gpgcheck=1
 gpgkey=https://downloads.1password.com/linux/keys/1password.asc
 EOF
 
+rpm --import https://downloads.1password.com/linux/keys/1password.asc
+
 # Normally, after-install.sh would create a group,
 # "onepassword", right about now. But if we do that during
 # the ostree build it'll disappear from the running system!
@@ -113,7 +115,7 @@ getent group onepassword-cli
 
 sudo dnf5 config-manager addrepo --from-repofile=https://negativo17.org/repos/fedora-steam.repo
 
-sudo dnf5 install steam kernel-modules-extra -y
+sudo dnf5 --disableexcludes=all install steam kernel-modules-extra -y
 
 echo "Wow"
 
