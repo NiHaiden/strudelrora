@@ -29,6 +29,16 @@ jobs:
   build_push:
     name: Build and push image
     runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - base_image: ghcr.io/ublue-os/aurora-dx:stable
+            image_tag: latest
+          - base_image: ghcr.io/ublue-os/aurora-dx:beta
+            image_tag: beta
+
+    env:
+      DEFAULT_TAG: ${{ matrix.image_tag }}
 
     permissions:
       contents: read
@@ -113,6 +123,8 @@ jobs:
           # Postfix image name with -custom to make it a little more descriptive
           # Syntax: https://docs.github.com/en/actions/learn-github-actions/expressions#format
           image: ${{ env.IMAGE_NAME }}
+          build-args: |
+            BASE_IMAGE=${{ matrix.base_image }}
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
           oci: false
