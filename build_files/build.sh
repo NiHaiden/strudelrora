@@ -111,10 +111,13 @@ EOF
 getent group onepassword
 getent group onepassword-cli
 
+# Install Steam from negativo17 repo
 sudo dnf5 config-manager addrepo --from-repofile=https://negativo17.org/repos/fedora-steam.repo
 
-sudo dnf5 install steam kernel-modules-extra -y
+# Install mesa vulkan drivers (32-bit) first to satisfy Steam dependencies
+sudo dnf5 -y install mesa-vulkan-drivers.i686
 
-echo "Wow"
+# Install Steam and kernel modules
+sudo dnf5 -y --setopt=install_weak_deps=False install steam kernel-modules-extra
 
 sudo dnf5 config-manager setopt fedora-steam.enabled=0
