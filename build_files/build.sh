@@ -110,3 +110,7 @@ EOF
 
 getent group onepassword
 getent group onepassword-cli
+
+dnf5 install -y webkit2gtk4.1 webkit2gtk4.1-devel
+
+
