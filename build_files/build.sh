@@ -113,12 +113,16 @@ fi
 
 # GitHub Actions downloads to `build_files/rpms`, and Containerfile copies
 # `build_files/*` to the temporary context root. That maps to `/ctx/rpms/*` here.
-APPGRID_RPM="/ctx/rpms/plasma6-applet-appgrid.rpm"
-if [[ ! -f "${APPGRID_RPM}" ]]; then
-    echo "Missing expected RPM: ${APPGRID_RPM}"
+shopt -s nullglob
+appgrid_rpms=(/ctx/rpms/plasma6-applet-appgrid*.rpm)
+shopt -u nullglob
+
+if (( ${#appgrid_rpms[@]} == 0 )); then
+    echo "Missing expected RPM under /ctx/rpms/plasma6-applet-appgrid*.rpm"
     exit 1
 fi
 
+APPGRID_RPM="${appgrid_rpms[0]}"
 echo "Installing plasma6-applet-appgrid from ${APPGRID_RPM}"
 dnf install -y "${APPGRID_RPM}"
 rpm -q plasma6-applet-appgrid
