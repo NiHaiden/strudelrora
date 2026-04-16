@@ -113,6 +113,13 @@ fi
 shopt -s nullglob
 appgrid_rpms=(/ctx/rpms/plasma6-applet-appgrid*.rpm)
 shopt -u nullglob
+filtered_appgrid_rpms=()
+for rpm_path in "${appgrid_rpms[@]}"; do
+    if [[ "${rpm_path}" != *.src.rpm ]]; then
+        filtered_appgrid_rpms+=("${rpm_path}")
+    fi
+done
+appgrid_rpms=("${filtered_appgrid_rpms[@]}")
 
 if (( ${#appgrid_rpms[@]} == 0 )); then
     echo "No appgrid RPM found in /ctx/rpms; skipping local appgrid install."
