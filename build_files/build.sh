@@ -133,7 +133,8 @@ else
     APPGRID_RPM="${appgrid_rpms[0]}"
     echo "Installing plasma6-applet-appgrid from ${APPGRID_RPM}"
     dnf install -y "${APPGRID_RPM}"
-    rpm -q plasma6-applet-appgrid
+    APPGRID_PACKAGE_NAME="$(rpm -qp --qf '%{NAME}\n' "${APPGRID_RPM}")"
+    rpm -q "${APPGRID_PACKAGE_NAME}"
 fi
 
 dnf5 install -y webkit2gtk4.1 webkit2gtk4.1-devel

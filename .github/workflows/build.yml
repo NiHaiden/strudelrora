@@ -147,8 +147,18 @@ jobs:
           fi
 
           podman run --rm "${IMAGE_REF}" bash -lc '
-            rpm -q plasma6-applet-appgrid
-            rpm -ql plasma6-applet-appgrid | grep -E "/usr/share/plasma/plasmoids/.+/metadata\\.json"
+            APPGRID_PACKAGE_NAME=""
+            if rpm -q plasma-applet-appgrid >/dev/null 2>&1; then
+              APPGRID_PACKAGE_NAME="plasma-applet-appgrid"
+            elif rpm -q plasma6-applet-appgrid >/dev/null 2>&1; then
+              APPGRID_PACKAGE_NAME="plasma6-applet-appgrid"
+            else
+              echo "No known appgrid package is installed."
+              exit 1
+            fi
+
+            rpm -q "${APPGRID_PACKAGE_NAME}"
+            rpm -ql "${APPGRID_PACKAGE_NAME}" | grep -E "/usr/share/plasma/plasmoids/.+/metadata\\.json"
           '
 
       # Rechunk is a script that we use on Universal Blue to make sure there isnt a single huge layer when your image gets published.
