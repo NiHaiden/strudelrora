@@ -46,6 +46,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
+      - name: Prepare local RPM directory
+        run: mkdir -p build_files/rpms
+
+      - name: Fetch RPM from GitHub release
+        id: appgrid_rpm
+        uses: NiHaiden/fetch-rpm@v0.1.0
+        with:
+          repository: xarbit/plasma6-applet-appgrid
+          download-dir: build_files/rpms
+          file-name: plasma6-applet-appgrid.rpm
+          asset-regex: ^(?!.*\.src\.rpm$).*plasma6-applet-appgrid.*{arch}.*\.rpm$
+
       # You only use this action if the container-storage-action proves to be unreliable, you don't need to enable both
       # This is optional, but if you see that your builds are way too big for the runners, you can enable this by uncommenting the following lines:
       - name: Maximize build space
@@ -116,6 +128,18 @@ jobs:
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
           oci: false
+
+      - name: Verify appgrid install in built image
+        run: |
+          IMAGE_REF="localhost/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
+          if ! podman image exists "${IMAGE_REF}"; then
+            IMAGE_REF="${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}"
+          fi
+
+          podman run --rm "${IMAGE_REF}" bash -lc '
+            rpm -q plasma6-applet-appgrid
+            rpm -ql plasma6-applet-appgrid | grep -E "/usr/share/plasma/plasmoids/.+/metadata\\.json"
+          '
 
       # Rechunk is a script that we use on Universal Blue to make sure there isnt a single huge layer when your image gets published.
       # This does not make your image faster to download, just provides better resumability and fixes a few errors.
