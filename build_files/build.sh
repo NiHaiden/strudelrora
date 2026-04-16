@@ -118,19 +118,19 @@ appgrid_rpms=(/ctx/rpms/plasma6-applet-appgrid*.rpm)
 shopt -u nullglob
 
 if (( ${#appgrid_rpms[@]} == 0 )); then
-    echo "No RPM files matching pattern /ctx/rpms/plasma6-applet-appgrid*.rpm were found"
-    exit 1
-fi
+    echo "No appgrid RPM found in /ctx/rpms; skipping local appgrid install."
+else
+    if (( ${#appgrid_rpms[@]} > 1 )); then
+        echo "Multiple appgrid RPMs found; selecting newest by version sort:"
+        printf ' - %s\n' "${appgrid_rpms[@]}"
+        APPGRID_RPM="$(printf '%s\n' "${appgrid_rpms[@]}" | sort -V | tail -n1)"
+    else
+        APPGRID_RPM="${appgrid_rpms[0]}"
+    fi
 
-if (( ${#appgrid_rpms[@]} > 1 )); then
-    echo "Expected exactly one appgrid RPM, found ${#appgrid_rpms[@]}:"
-    printf ' - %s\n' "${appgrid_rpms[@]}"
-    exit 1
+    echo "Installing plasma6-applet-appgrid from ${APPGRID_RPM}"
+    dnf install -y "${APPGRID_RPM}"
+    rpm -q plasma6-applet-appgrid
 fi
-
-APPGRID_RPM="${appgrid_rpms[0]}"
-echo "Installing plasma6-applet-appgrid from ${APPGRID_RPM}"
-dnf install -y "${APPGRID_RPM}"
-rpm -q plasma6-applet-appgrid
 
 dnf5 install -y webkit2gtk4.1 webkit2gtk4.1-devel
