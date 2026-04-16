@@ -62,6 +62,12 @@ jobs:
           # (for example x86_64/amd64/noarch) to pick the best matching asset.
           asset-regex: ^(?!.*\.src\.rpm$).*plasma6-applet-appgrid.*{arch}.*\.rpm$
 
+      - name: Ensure RPM is in build_files/rpms
+        run: |
+          if [[ -f plasma6-applet-appgrid.rpm && ! -f build_files/rpms/plasma6-applet-appgrid.rpm ]]; then
+            mv plasma6-applet-appgrid.rpm build_files/rpms/plasma6-applet-appgrid.rpm
+          fi
+
       # You only use this action if the container-storage-action proves to be unreliable, you don't need to enable both
       # This is optional, but if you see that your builds are way too big for the runners, you can enable this by uncommenting the following lines:
       - name: Maximize build space
