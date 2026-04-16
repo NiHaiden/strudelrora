@@ -111,6 +111,8 @@ EOF
     getent group onepassword-cli
 fi
 
+# GitHub Actions downloads to `build_files/rpms`, and Containerfile copies
+# `build_files/*` to the temporary context root. That maps to `/ctx/rpms/*` here.
 APPGRID_RPM="/ctx/rpms/plasma6-applet-appgrid.rpm"
 if [[ ! -f "${APPGRID_RPM}" ]]; then
     echo "Missing expected RPM: ${APPGRID_RPM}"
@@ -122,4 +124,3 @@ dnf install -y "${APPGRID_RPM}"
 rpm -q plasma6-applet-appgrid
 
 dnf5 install -y webkit2gtk4.1 webkit2gtk4.1-devel
-

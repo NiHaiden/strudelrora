@@ -47,6 +47,8 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
       - name: Prepare local RPM directory
+        # Containerfile copies `build_files/*` into the temporary build context root (`/ctx/*`),
+        # so this becomes available as `/ctx/rpms/...` during `build_files/build.sh`.
         run: mkdir -p build_files/rpms
 
       - name: Fetch RPM from GitHub release
@@ -56,6 +58,8 @@ jobs:
           repository: xarbit/plasma6-applet-appgrid
           download-dir: build_files/rpms
           file-name: plasma6-applet-appgrid.rpm
+          # `{arch}` is expanded by NiHaiden/fetch-rpm into arch candidates
+          # (for example x86_64/amd64/noarch) to pick the best matching asset.
           asset-regex: ^(?!.*\.src\.rpm$).*plasma6-applet-appgrid.*{arch}.*\.rpm$
 
       # You only use this action if the container-storage-action proves to be unreliable, you don't need to enable both
