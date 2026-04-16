@@ -12,11 +12,6 @@ set -ouex pipefail
 # Extract the architecture from the kernel package
 arch=$(rpm -q kernel --qf "%{ARCH}\n" | head -n1)
 
-# Check if the architecture is aarch64
-if [[ "$arch" == "aarch64" ]]; then
-    echo "1Password does not create aarch64 packages"
-fi
-
 # Thanks to bri for the inspiration! My script is mostly based on this example:
 # https://github.com/briorg/bluefin/blob/c62c30a04d42fd959ea770722c6b51216b4ec45b/scripts/1password.sh
 
@@ -109,6 +104,8 @@ EOF
 
     getent group onepassword
     getent group onepassword-cli
+else
+    echo "1Password does not create aarch64 packages"
 fi
 
 # GitHub Actions downloads to `build_files/rpms`, and Containerfile copies
@@ -121,13 +118,12 @@ if (( ${#appgrid_rpms[@]} == 0 )); then
     echo "No appgrid RPM found in /ctx/rpms; skipping local appgrid install."
 else
     if (( ${#appgrid_rpms[@]} > 1 )); then
-        echo "Multiple appgrid RPMs found; selecting newest by version sort:"
+        echo "Expected at most one appgrid RPM under /ctx/rpms, found ${#appgrid_rpms[@]}:"
         printf ' - %s\n' "${appgrid_rpms[@]}"
-        APPGRID_RPM="$(printf '%s\n' "${appgrid_rpms[@]}" | sort -V | tail -n1)"
-    else
-        APPGRID_RPM="${appgrid_rpms[0]}"
+        exit 1
     fi
 
+    APPGRID_RPM="${appgrid_rpms[0]}"
     echo "Installing plasma6-applet-appgrid from ${APPGRID_RPM}"
     dnf install -y "${APPGRID_RPM}"
     rpm -q plasma6-applet-appgrid

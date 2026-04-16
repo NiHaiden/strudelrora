@@ -53,7 +53,7 @@ jobs:
 
       - name: Fetch RPM from GitHub release
         id: appgrid_rpm
-        uses: NiHaiden/fetch-rpm@v0.1.0
+        uses: NiHaiden/fetch-rpm@6c6bac647a97e1b163278ba57008b22fcfbb2843 # v0.1.0
         with:
           repository: xarbit/plasma6-applet-appgrid
           download-dir: build_files/rpms
