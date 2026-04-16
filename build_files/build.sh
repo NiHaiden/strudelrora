@@ -118,7 +118,13 @@ appgrid_rpms=(/ctx/rpms/plasma6-applet-appgrid*.rpm)
 shopt -u nullglob
 
 if (( ${#appgrid_rpms[@]} == 0 )); then
-    echo "Missing expected RPM under /ctx/rpms/plasma6-applet-appgrid*.rpm"
+    echo "No RPM files matching pattern /ctx/rpms/plasma6-applet-appgrid*.rpm were found"
+    exit 1
+fi
+
+if (( ${#appgrid_rpms[@]} > 1 )); then
+    echo "Expected exactly one appgrid RPM, found ${#appgrid_rpms[@]}:"
+    printf ' - %s\n' "${appgrid_rpms[@]}"
     exit 1
 fi
 
