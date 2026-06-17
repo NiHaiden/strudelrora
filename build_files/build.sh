@@ -108,33 +108,4 @@ else
     echo "1Password does not create aarch64 packages"
 fi
 
-# GitHub Actions downloads to `build_files/rpms`, and Containerfile copies
-# `build_files/*` to the temporary context root. That maps to `/ctx/rpms/*` here.
-shopt -s nullglob
-appgrid_rpms=(/ctx/rpms/plasma6-applet-appgrid*.rpm)
-shopt -u nullglob
-filtered_appgrid_rpms=()
-for rpm_path in "${appgrid_rpms[@]}"; do
-    if [[ "${rpm_path}" != *.src.rpm ]]; then
-        filtered_appgrid_rpms+=("${rpm_path}")
-    fi
-done
-appgrid_rpms=("${filtered_appgrid_rpms[@]}")
-
-if (( ${#appgrid_rpms[@]} == 0 )); then
-    echo "No appgrid RPM found in /ctx/rpms; skipping local appgrid install."
-else
-    if (( ${#appgrid_rpms[@]} > 1 )); then
-        echo "Expected at most one appgrid RPM under /ctx/rpms, found ${#appgrid_rpms[@]}:"
-        printf ' - %s\n' "${appgrid_rpms[@]}"
-        exit 1
-    fi
-
-    APPGRID_RPM="${appgrid_rpms[0]}"
-    echo "Installing plasma6-applet-appgrid from ${APPGRID_RPM}"
-    dnf install -y "${APPGRID_RPM}"
-    APPGRID_PACKAGE_NAME="$(rpm -qp --qf '%{NAME}\n' "${APPGRID_RPM}")"
-    rpm -q "${APPGRID_PACKAGE_NAME}"
-fi
-
 dnf5 install -y webkit2gtk4.1 webkit2gtk4.1-devel
