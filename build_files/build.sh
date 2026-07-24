@@ -56,6 +56,7 @@ EOF
     # at 1000, so let's skip ahead and set to something higher.
     GID_ONEPASSWORD="1790"
     GID_ONEPASSWORDCLI="1791"
+    GID_ONEPASSWORDMCP="1792"
 
     cat >/usr/lib/sysusers.d/onepassword.conf <<EOF
 g onepassword ${GID_ONEPASSWORD}
@@ -65,8 +66,18 @@ EOF
 g onepassword-cli ${GID_ONEPASSWORDCLI}
 EOF
 
+    cat >/usr/lib/sysusers.d/onepassword-mcp.conf <<EOF
+g onepassword-mcp ${GID_ONEPASSWORDMCP}
+EOF
+
     systemd-sysusers /usr/lib/sysusers.d/onepassword.conf
     systemd-sysusers /usr/lib/sysusers.d/onepassword-cli.conf
+    systemd-sysusers /usr/lib/sysusers.d/onepassword-mcp.conf
+
+    # /usr/local points to /var/usrlocal, which is not populated during an
+    # image build. The 1Password post-install script needs this target for
+    # its MCP helper symlink.
+    mkdir -p /var/usrlocal/bin
 
     # Now let's install the packages.
     dnf install -y 1password 1password-cli
@@ -96,14 +107,24 @@ EOF
     chgrp ${GID_ONEPASSWORDCLI} /usr/bin/op
     chmod g+s /usr/bin/op
 
+    # The desktop package also ships an MCP helper on recent releases.
+    MCP_SUPPORT_PATH="/usr/lib/1Password/1password-mcp"
+    if [[ -f "${MCP_SUPPORT_PATH}" ]]; then
+        chgrp "${GID_ONEPASSWORDMCP}" "${MCP_SUPPORT_PATH}"
+        chmod g+s "${MCP_SUPPORT_PATH}"
+    fi
+
     # Register path symlink
     # We do this via tmpfiles.d so that it is created by the live system.
     cat >/usr/lib/tmpfiles.d/eternal-onepassword.conf <<EOF
 L  /opt/1Password  -  -  -  -  /usr/lib/1Password
+d  /var/usrlocal/bin  0755  root  root  -
+L  /var/usrlocal/bin/1password-mcp  -  -  -  -  /opt/1Password/1password-mcp
 EOF
 
     getent group onepassword
     getent group onepassword-cli
+    getent group onepassword-mcp
 else
     echo "1Password does not create aarch64 packages"
 fi
