@@ -129,8 +129,10 @@ else
     echo "1Password does not create aarch64 packages"
 fi
 
-wget -O /usr/share/polkit-1/actions/com.bitwarden.Bitwarden.policy https://raw.githubusercontent.com/bitwarden/clients/main/apps/desktop/resources/com.bitwarden.desktop.policy
+# This one-off HTTPS download does not need a persistent HSTS cache in /root.
+wget --no-hsts -O /usr/share/polkit-1/actions/com.bitwarden.Bitwarden.policy https://raw.githubusercontent.com/bitwarden/clients/main/apps/desktop/resources/com.bitwarden.desktop.policy
 chown root:root /usr/share/polkit-1/actions/com.bitwarden.Bitwarden.policy
-chcon system_u:object_r:usr_t:s0 /usr/share/polkit-1/actions/com.bitwarden.Bitwarden.policy
+chmod 0644 /usr/share/polkit-1/actions/com.bitwarden.Bitwarden.policy
+# bootc applies SELinux file contexts at deployment; chcon is denied during builds.
 
 dnf5 install -y webkit2gtk4.1 webkit2gtk4.1-devel
