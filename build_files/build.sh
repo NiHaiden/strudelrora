@@ -136,3 +136,14 @@ chmod 0644 /usr/share/polkit-1/actions/com.bitwarden.Bitwarden.policy
 # bootc applies SELinux file contexts at deployment; chcon is denied during builds.
 
 dnf5 install -y webkit2gtk4.1 webkit2gtk4.1-devel
+
+# Claude Desktop: repackage Anthropic's official Linux build as an RPM (x86_64 only).
+# Installs to /usr/lib/claude-desktop, so no /opt workaround is needed.
+if [[ "$arch" == "x86_64" ]]; then
+    dnf5 install -y rpm-build binutils file xz curl gnupg2
+    git clone --depth 1 https://github.com/dewzor/claude-desktop-fedora.git /tmp/claude-desktop-fedora
+    (cd /tmp/claude-desktop-fedora && ./build-official.sh)
+    dnf5 install -y /tmp/claude-desktop-fedora/build/official/claude-desktop-*.rpm
+else
+    echo "Claude Desktop only ships x86_64 builds"
+fi
