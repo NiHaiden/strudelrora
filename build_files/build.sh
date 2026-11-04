@@ -147,3 +147,17 @@ if [[ "$arch" == "x86_64" ]]; then
 else
     echo "Claude Desktop only ships x86_64 builds"
 fi
+
+# LibrePods: the binary itself is built in the librepods-builder stage of the Containerfile.
+# VendorID spoofing: advertise Apple's Bluetooth vendor ID (0x004C) in the DID profile so
+# AirPods unlock extra features (e.g. Loud Sound Reduction, hearing aid/accessibility settings).
+# See https://github.com/librepods-org/librepods#vendorid-spoofing
+# Note: this makes the machine identify as an Apple device to *every* Bluetooth peer, and
+# AirPods may need to be re-paired because they cache the DeviceID.
+BT_MAIN_CONF=/etc/bluetooth/main.conf
+if grep -qE '^[#[:space:]]*DeviceID[[:space:]]*=' "${BT_MAIN_CONF}"; then
+    sed -i -E '0,/^[#[:space:]]*DeviceID[[:space:]]*=.*/s//DeviceID = bluetooth:004C:0000:0000/' "${BT_MAIN_CONF}"
+else
+    sed -i '/^\[General\]/a DeviceID = bluetooth:004C:0000:0000' "${BT_MAIN_CONF}"
+fi
+grep -qx 'DeviceID = bluetooth:004C:0000:0000' "${BT_MAIN_CONF}"

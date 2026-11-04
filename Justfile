@@ -94,6 +94,12 @@ build $target_image=image_name $tag=default_tag:
         BUILD_ARGS+=("--build-arg" "SHA_HEAD_SHORT=$(git rev-parse --short HEAD)")
     fi
 
+    # Always build the newest LibrePods commit (also busts the cached builder layer).
+    LIBREPODS_REF="$(git ls-remote https://github.com/librepods-org/librepods.git refs/heads/linux/rust | cut -f1)"
+    if [[ -n "${LIBREPODS_REF}" ]]; then
+        BUILD_ARGS+=("--build-arg" "LIBREPODS_REF=${LIBREPODS_REF}")
+    fi
+
     podman build \
         "${BUILD_ARGS[@]}" \
         --pull=newer \

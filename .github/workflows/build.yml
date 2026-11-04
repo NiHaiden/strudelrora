@@ -104,6 +104,21 @@ jobs:
           sep-tags: " "
           sep-annotations: " "
 
+      # Resolve the newest LibrePods commit so every image build compiles the latest upstream
+      # code (the published Linux release is a year old). Passing the SHA as a build-arg also
+      # invalidates any cached builder layer whenever upstream changes.
+      - name: Resolve latest LibrePods commit
+        id: librepods
+        run: |
+          set -euo pipefail
+          sha=$(git ls-remote https://github.com/librepods-org/librepods.git refs/heads/linux/rust | cut -f1)
+          if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Could not resolve LibrePods linux/rust HEAD (got: '$sha')" >&2
+            exit 1
+          fi
+          echo "Building LibrePods at $sha"
+          echo "ref=$sha" >> "$GITHUB_OUTPUT"
+
       - name: Build Image
         id: build_image
         uses: redhat-actions/buildah-build@27e5954dfd56a621f706827f2de689dc955e8711 # v3.0.1
@@ -115,6 +130,8 @@ jobs:
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
+          build-args: |
+            LIBREPODS_REF=${{ steps.librepods.outputs.ref }}
           oci: false
           squash: false
 

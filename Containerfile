@@ -2,8 +2,35 @@
 FROM scratch AS ctx
 COPY build_files /
 
+# LibrePods (AirPods control): built from source on every image build, because the
+# published Linux release is far behind. The Rust rewrite on the `linux/rust` branch is
+# what upstream recommends. CI passes the branch's current commit SHA as LIBREPODS_REF,
+# which also busts the layer cache whenever upstream changes.
+# Built on the same base as the final image so the binary links against identical libs.
+FROM ghcr.io/ublue-os/aurora-dx:testing AS librepods-builder
+ARG LIBREPODS_REPO=https://github.com/librepods-org/librepods.git
+ARG LIBREPODS_REF=linux/rust
+RUN --mount=type=cache,dst=/var/cache \
+    --mount=type=tmpfs,dst=/tmp \
+    dnf5 install -y --setopt=install_weak_deps=False \
+        cargo rust gcc pkgconf-pkg-config dbus-devel pulseaudio-libs-devel git && \
+    git init -q /src && cd /src && \
+    git remote add origin "${LIBREPODS_REPO}" && \
+    git fetch -q --depth 1 origin "${LIBREPODS_REF}" && \
+    git checkout -q FETCH_HEAD && \
+    echo "Building LibrePods $(git rev-parse HEAD)" && \
+    cd linux-rust && \
+    CARGO_HOME=/tmp/cargo cargo build --release --locked && \
+    mkdir -p /out/usr/bin /out/usr/share/applications /out/usr/share/icons/hicolor/256x256/apps /out/usr/share/librepods && \
+    install -m755 target/release/librepods /out/usr/bin/librepods && \
+    install -m644 assets/me.kavishdevar.librepods.desktop /out/usr/share/applications/me.kavishdevar.librepods.desktop && \
+    install -m644 assets/icon.png /out/usr/share/icons/hicolor/256x256/apps/me.kavishdevar.librepods.png && \
+    git -C /src rev-parse HEAD > /out/usr/share/librepods/commit
+
 # Base Image
 FROM ghcr.io/ublue-os/aurora-dx:testing
+
+COPY --from=librepods-builder /out/ /
 
 ## Other possible base images include:
 # FROM ghcr.io/ublue-os/bazzite:latest
